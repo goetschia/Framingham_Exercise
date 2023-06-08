@@ -22,6 +22,26 @@ In this short report, I am analysing whether the LDL-C concentration has an infl
 Three-thousand twenty-six LDL-C serum concentrations were available. The mean of LDL-C serum concentration amounted to 176.47 mg/dl (standard deviation = 46.86 mg/dl). The measurements ranged from 20 to 565 mg/dl. I calculated an exact 95% confidence interval according to Student of 174.80 - 178.14 mg/dl for the mean. 
 
 ```{r}
+# Statistics
+
+mean_ldl <- mean(framingham$LDLC, na.rm = T)
+median_ldl <- median(framingham$LDLC, na.rm = T)
+quartiles_ldl <- quantile(framingham$LDLC, na.rm = T, probs = c(0.25,0.5, 0.75))
+var_ldl <- var(framingham$LDLC, na.rm = T)
+sd_ldl <- sd(framingham$LDLC, na.rm = T)
+range_ldl <- range(framingham$LDLC, na.rm = T)
+iqr_ldl <- IQR(framingham$LDLC, na.rm = T)
+# CIs
+n <- length(which(!is.na(framingham$LDLC)))
+tQuant <- qt(p = 0.975, df = n-1)
+ldl_SE <- sd_ldl/sqrt(n)
+
+CI_upper <- mean_ldl + tQuant*ldl_SE
+CI_lower <- mean_ldl - tQuant*ldl_SE
+```
+
+
+```{r}
 #| label: fig-dist
 #| fig-cap: "Distribution of LDL-C serum concentrations. The mean is depcited in blue, and the median in red."
 #| fig-width: 8
@@ -32,6 +52,6 @@ median_ldl <- median(framingham$LDLC, na.rm = T)
 ggplot(framingham, aes(x = LDLC)) + geom_histogram(binwidth = 10) +
   geom_vline(xintercept = mean_ldl, colour = "blue") +
   geom_vline(xintercept = median_ldl, colour = "red") + 
-  xlab(label = "LDL-C [mg/dl]") + ylab(label = "")
+  xlab(label = "LDL-C [mg/dl]") + ylab(label = "") + theme_bw()
 ```
 
