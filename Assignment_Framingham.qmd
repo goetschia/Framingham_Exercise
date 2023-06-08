@@ -55,3 +55,16 @@ ggplot(framingham, aes(x = LDLC)) + geom_histogram(binwidth = 10) +
   xlab(label = "LDL-C [mg/dl]") + ylab(label = "") + theme_bw()
 ```
 
+To compare whether there is a difference in LDL-C concentrations in dead and alive people, we first loook at the distribution of LDL-C concentrations in both groups.
+
+```{r}
+#| label: fig-dist-dead
+#| fig-cap: "Distribution of LDL-C serum concentrations for dead and alive people."
+#| fig-width: 8
+#| fig-height: 4
+framingham <- framingham %>% mutate(DEATH = factor(DEATH))
+
+ggplot(framingham, aes(x = LDLC, fill = DEATH)) + geom_histogram(aes(y = after_stat(density)), colour = "white") + scale_fill_discrete(name = "", labels = c("alive", "dead")) +
+  xlab("LDL-C serum concentration [mg/dl]") + ylab("Density") + facet_wrap(~DEATH) + theme_bw() 
+```
+
