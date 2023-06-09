@@ -31,7 +31,8 @@ CI_lower <- mean_ldl - tQuant*ldl_SE
 framingham <- framingham %>% mutate(DEATH = factor(DEATH))
 
 p_ldl_death <- ggplot(framingham, aes(x = DEATH, y = LDLC)) + geom_boxplot() +
-  xlab(label = "Died") + ylab("LDL-C serum concentration [mg/dl]") + theme_bw()
+  xlab(label = "Died") + ylab("LDL-C serum concentration [mg/dl]") +
+   scale_x_binned(breaks = c("alive","dead"))+ theme_bw()
 
 p_ldl_death_dist <- ggplot(framingham, aes(x = LDLC, fill = DEATH)) + geom_histogram(aes(y = after_stat(density)), colour = "white") +
   xlab("LDL-C serum concentration [mg/dl]") + ylab("Density") + facet_wrap(~DEATH) + theme_bw() 
