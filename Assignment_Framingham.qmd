@@ -55,16 +55,66 @@ ggplot(framingham, aes(x = LDLC)) + geom_histogram(binwidth = 10) +
   xlab(label = "LDL-C [mg/dl]") + ylab(label = "") + theme_bw()
 ```
 
-To compare whether there is a difference in LDL-C concentrations in dead and alive people, we first loook at the distribution of LDL-C concentrations in both groups.
+## Testing for normality
+
+To compare whether there is a difference in LDL-C concentrations in dead and alive people, we first look at the distribution of LDL-C concentrations in both groups. We do this to look whether both groups are distributed normally. We see in following figure a light skew to the right.
 
 ```{r}
 #| label: fig-dist-dead
 #| fig-cap: "Distribution of LDL-C serum concentrations for dead and alive people."
 #| fig-width: 8
 #| fig-height: 4
-framingham <- framingham %>% mutate(DEATH = factor(DEATH))
+framingham <- framingham %>% mutate(DEATH = factor(DEATH, levels = c(0,1), labels = c("alive", "dead" )))
 
 ggplot(framingham, aes(x = LDLC, fill = DEATH)) + geom_histogram(aes(y = after_stat(density)), colour = "white") + scale_fill_discrete(name = "", labels = c("alive", "dead")) +
   xlab("LDL-C serum concentration [mg/dl]") + ylab("Density") + facet_wrap(~DEATH) + theme_bw() 
 ```
+
+To further investigate, I display the QQ-plot for both groups.
+
+```{r}
+#| label: fig-qq-both
+#| fig-cap: "QQ-Plot of LDL-C serum concentrations for both dead and alive."
+#| fig-width: 8
+#| fig-height: 4
+ggplot(framingham, aes(sample = LDLC)) + geom_qq() + geom_qq_line() + facet_wrap(~DEATH) + xlab("Normal theoratical quantiles") + ylab("Quantiles of LDL-C concentrations") + theme_bw()
+```
+Both groups deviate from the identity, suggesting non-normality. 
+
+As an analytical measure for normality, I computed the kolmogorov-smirnov statistic. For alive patients:
+
+```{r}
+ks.test(framingham$LDLC[framingham$DEATH == "alive"], "pnorm")
+```
+As the p-value is very small, the evidence for non-nomality is strong.
+
+For dead patients:
+```{r}
+ks.test(framingham$LDLC[framingham$DEATH == "dead"], "pnorm")
+```
+Also for this group, the evidence is strong that the data follow non-normal distribution.
+
+## Comparison of distributions
+I computed some descriptive statistics for LDL-C concentrations for both dead and alive people.
+
+```{r}
+framingham %>% group_by(DEATH) %>% summarise(mean = mean(LDLC, na.rm = T), SD = sd(LDLC, na.rm =T), median = median(LDLC, na.rm =T), min = min(LDLC, na.rm = T), max = max(LDLC, na.rm = T))
+```
+
+A further comparison of LDL-C concentrations in dead and alive patients, we show in following boxplot.
+
+```{r}
+#| label: fig-boxplot
+#| fig-cap: "Boxplot of the distributions of LDL-C serum concentrations in dead and alive patients."
+#| fig-width: 8
+#| fig-height: 4
+ggplot(framingham, aes(x = DEATH, y = LDLC)) + geom_boxplot() +
+  ylab("LDL-C serum concentration [mg/dl]") + 
+  theme_bw()
+```
+To describe whether the medians differ significantly, we compute the wilcoxon test.
+```{r}
+framingham %>% wilcox_test(LDLC~DEATH) %>% kable()
+```
+There is moderate evidence that the difference in medians is significant according to the wilcoxon test. As per the clinical relevance, I argue that such a small difference likely has little impact. 
 
